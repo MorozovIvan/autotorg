@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <div class="container">
+
+        <div class="blog-header">
+            <h1 class="blog-title">Automobiles</h1>
+            <p class="lead blog-description">Find your own dream</p>
+        </div>
+
+        <div class="row">
+
+            <div class="col-sm-8 blog-main">
+
+                {% for car in automobiles %}
+
+                    <div class="jumbotron">
+                        <div class="blog-post">
+                            <h2 class="blog-post-title">{{ car.brand }}</h2>
+                            <p class="blog-post-meta">January 1, 2014 by <a href="#">Mark</a></p>
+                            {{ dump(car.images) }}
+                            <blockquote>
+                                <p>{{ car.description }}</p>
+                            </blockquote>
+
+                            <dev class="price">
+                                <span>Price: </span>{{ car.price }} <span class="currency">$</span>
+                            </dev>
+
+                            <div class="region">
+                                <span>Region: </span>{{ car.region.name }}
+                            </div>
+
+                            <div class="year">
+                                <span>Year: </span>{{ car.year }}
+                            </div>
+
+                            <div class="condition">
+                                <span>Condition: </span>{{ car.condition.name }}
+                            </div>
+
+                        </div><!-- /.blog-post -->
+                        <p>
+                            <a class="btn btn-lg btn-primary" href="{{ path('auto_details', {'id': car.id}) }}" role="button">Подробнее »</a>
+                        </p>
+                    </div>
+
+                {% endfor %}
+
+                <ul class="pager">
+                    <li><a href="#">Previous</a></li>
+                    <li><a href="#">Next</a></li>
+                </ul>
+
+            </div><!-- /.blog-main -->
+
+            <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
+
+                {% block sidebar %}
+                    <div class="section filter">
+                        {{ include('partial/sidebar.html.twig') }}
+                    </div>
+                {% endblock %}
+
+            </div><!-- /.blog-sidebar -->
+
+        </div><!-- /.row -->
+
+    </div>
+
+{% endblock %}

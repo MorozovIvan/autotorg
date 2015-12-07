@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    <div class="container">
+
+        <div class="blog-header">
+            <h1 class="blog-title">Auto create form</h1>
+        </div>
+
+        <div class="row">
+
+            {{ form_start(form) }}
+            {{ form_widget(form) }}
+            {{ form_end(form) }}
+
+        </div><!-- /.row -->
+
+    </div>
+
+{% endblock %}
