@@ -2,7 +2,6 @@
 
 namespace AppBundle\Controller;
 
-use AppBundle\Entity\Car_condition;
 use AppBundle\Entity\Image;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -13,9 +12,7 @@ use AppBundle\Entity\Country;
 use AppBundle\Entity\Region;
 use AppBundle\Entity\City;
 
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use AppBundle\Form\Type\AddAutoType;
 
 
 
@@ -81,85 +78,43 @@ class DefaultController extends Controller
      */
     public function createAutoAction(Request $request)
     {
-        //return new Response('Created product id '.$auto->getId());
-
         $auto = new Auto();
 
-        $conditions_arr = array();
-        $regions_arr = array();
-
-        $regions =  $this->getDoctrine()
-            ->getRepository('AppBundle:Region')
-            ->findAll();
-
-        $conditions =  $this->getDoctrine()
-            ->getRepository('AppBundle:Car_condition')
-            ->findAll();
-
-        foreach ($conditions as $condition) {
-            $conditions_arr[$condition->getName()] = $condition;
-        }
-
-        foreach ($regions as $region) {
-            $regions_arr[$region->getName()] = $region;
-        }
-
-        $form = $this->createFormBuilder($auto)
-            ->add('brand', TextType::class)
-            ->add('model', TextType::class)
-            ->add('price', TextType::class)
-            ->add('year', TextType::class)
-            ->add('description', TextType::class)
-            ->add('region', ChoiceType::class, array(
-                'placeholder' => 'Choose an option',
-                'choices' => $regions_arr,
-            ))
-            ->add('car_condition', ChoiceType::class, array(
-                'placeholder' => 'Choose an option',
-                'choices' => $conditions_arr,
-            ))
-            ->add('save', SubmitType::class, array('label' => 'Create auto'))
-            ->getForm();
+        $form = $this->createForm(AddAutoType::class, $auto);
 
         $form->handleRequest($request);
 
-        if ($form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {
 
-//dump($request); die;
-            $region =  $this->getDoctrine()
-                ->getRepository('AppBundle:Region')
-                ->find(4);
+            $auto = $form->getData();
 
-            $car_condition = new Car_condition();
-            $car_condition->setName('old');
-
-            $image = new Image();
-            $image->setTitle('Mega image');
-            $image->setImage('path/img.jpg');
-            $image->setMain('1');
-
-            $auto = new Auto();
-            $auto->setBrand('Lamborgini');
-            $auto->setModel('Murcielago');
-            $auto->setPrice('99999999,55');
-            $auto->setYear('2005');
-            $auto->setDescription('Mega car, super just super');
-            $auto->setRegion($region);
-            $auto->setCarCondition($car_condition);
-            $auto->addImage($image);
             $auto->setCreatedAt( new \DateTime(date('Y-m-d H:i:s')) );
             $auto->setUpdatedAt( new \DateTime(date('Y-m-d H:i:s')) );
 
+            $file = $auto->getImage();
+
+            $fileName = md5(uniqid()).'.'.$file->guessExtension();
+
+            $imageDir = $this->container->getParameter('kernel.root_dir').'/../web/uploads/auto/' . $auto->getBrand();
+
+            $file->move($imageDir, $fileName);
+
+            $image = new Image();
+
+            $image->setTitle($auto->getBrand() . ' image');
+            $image->setImage($fileName);
+            $image->setMain('1');
+
+            $auto->addImage($image);
+
             $em = $this->getDoctrine()->getManager();
 
-            $em->persist($region);
-            $em->persist($car_condition);
             $em->persist($image);
             $em->persist($auto);
 
             $em->flush();
 
-            return $this->redirectToRoute('auto_create_success');
+            return $this->redirectToRoute('auto_create_success', ['id' => $auto->getId()]);
         }
 
         return $this->render('default/auto_create_form.html.twig', array(

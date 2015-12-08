@@ -19,6 +19,7 @@ class Auto
      * @ORM\OneToMany(targetEntity="Image", mappedBy="auto", cascade={"persist"})
      */
     protected $images;
+    protected $image;
 
     /**
      * Constructor
@@ -285,6 +286,28 @@ class Auto
     {
         $this->images->add($image);
         $image->setAuto($this);
+    }
+
+    /**
+     * Set image
+     *
+     * @return string
+     */
+    public function setImage($image)
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
+    /**
+     * Get image
+     *
+     * @return string
+     */
+    public function getImage()
+    {
+        return $this->image;
     }
 
     /**
